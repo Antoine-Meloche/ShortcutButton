@@ -1,0 +1,8 @@
+{
+  "name": "Shortcut Button",
+  "description": "A Button to execute a command in your shell panel",
+  "uuid": "shortcutbutton@antoine-meloche.github.com",
+  "shell-version": [
+    "42"
+  ]
+}
