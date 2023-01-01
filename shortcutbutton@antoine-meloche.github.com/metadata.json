@@ -4,5 +4,6 @@
   "uuid": "shortcutbutton@antoine-meloche.github.com",
   "shell-version": [
     "42"
-  ]
+  ],
+  "prefs_schema": "org.gnome.shell.extensions.shortcutbutton.gschema.xml"
 }

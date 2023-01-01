@@ -21,27 +21,32 @@
 const { GObject, St, GLib, Clutter } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
-
-let command = '';
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
-    _init() {
-        super._init(0.0, 'Indicator');
+  _init() {
+    super._init(0.0, 'Indicator');
 
-        this.add_child(new St.Icon({
-            icon_name: 'emblem-symbolic-link',
-            style_class: 'system-status-icon',
-        }));
+    this.add_child(new St.Icon({
+      icon_name: 'emblem-symbolic-link',
+      style_class: 'system-status-icon',
+    }));
 
-        this.connect('button_press_event', (_obj, evt) => {
-            if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
-                let [success, pid] = GLib.spawn_command_line_async(command);
-            } else {
+	  this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.shortcutbutton');
 
-            }
-        })
-    }
+    this.connect('button_press_event', (_obj, evt) => {
+      if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
+	      let command = this.settings.get_value('command').get_string()[0];
+	      log(`command: ${command}`);
+
+        let [success, pid] = GLib.spawn_command_line_async(command);
+      } else {
+        let [success, pid] = GLib.spawn_command_line_async('gnome-extensions prefs shortcutbutton@antoine-meloche.github.com');
+      }
+    })
+  }
 });
 
 class Extension {
@@ -52,6 +57,7 @@ class Extension {
     enable() {
         this._indicator = new Indicator();
         Main.panel.addToStatusArea(this._uuid, this._indicator);
+        log(`enabling ${Me.metadata.name}`);
     }
 
     disable() {
