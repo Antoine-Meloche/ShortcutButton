@@ -4,7 +4,7 @@ A Gnome extension to add a shortcut button in the panel to execute any command w
 
 ## Installation
 
-*The extension should be added to extensions.gnome.org shortly* Install the extension from extensions.gnome.org or directly from the extensions application.
+Install the extension from [extensions.gnome.org](https://extensions.gnome.org/extension/5636/shortcut-button/) or directly from the extensions application.
 
 ### Manual installation
 
