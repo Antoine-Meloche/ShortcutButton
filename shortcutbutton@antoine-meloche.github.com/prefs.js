@@ -24,7 +24,7 @@ class UserCommandPrefsWidget extends Adw.PreferencesGroup {
     // this.connect('destroy', Gtk.main_quit);
 
     let commandLabel = new Gtk.Label({
-      label: "Command to execute:"
+      label: "Command to execute: "
     });
     let commandEntry = new Gtk.Entry();
     commandEntry.connect('changed', (w) => {
