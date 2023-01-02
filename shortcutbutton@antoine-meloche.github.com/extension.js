@@ -39,7 +39,9 @@ class Indicator extends PanelMenu.Button {
     this.connect('button_press_event', (_obj, evt) => {
       if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
 	      let command = this.settings.get_value('command').get_string()[0];
-	      log(`command: ${command}`);
+        if (command == "") {
+            log('ERR [Shortcut Button]: No command specified')
+          }
 
         let [success, pid] = GLib.spawn_command_line_async(command);
       } else {
@@ -57,7 +59,6 @@ class Extension {
     enable() {
         this._indicator = new Indicator();
         Main.panel.addToStatusArea(this._uuid, this._indicator);
-        log(`enabling ${Me.metadata.name}`);
     }
 
     disable() {
