@@ -39,11 +39,13 @@ class Indicator extends PanelMenu.Button {
     this.connect('button_press_event', (_obj, evt) => {
       if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
 	      let command = this.settings.get_value('command').get_string()[0];
-	      log(`command: ${command}`);
+	      if (command == "") {
+	      	log('Shortcut Button error: no command specified')
+	      }
 
         let [success, pid] = GLib.spawn_command_line_async(command);
       } else {
-        let [success, pid] = GLib.spawn_command_line_async('gnome-extensions prefs shortcutbutton@antoine-meloche.github.com');
+        ExtensionUtils.openPrefs();
       }
     })
   }

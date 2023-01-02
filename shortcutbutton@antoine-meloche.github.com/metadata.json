@@ -5,7 +5,7 @@
   "shell-version": [
     "42"
   ],
-  "version": 1.1,
+  "version": 1.2,
   "url": "https://github.com/Antoine-Meloche/ShortcutButton",
   "prefs_schema": "org.gnome.shell.extensions.shortcutbutton.gschema.xml"
 }
