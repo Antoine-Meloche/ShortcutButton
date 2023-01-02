@@ -9,7 +9,7 @@ A Gnome extension to add a shortcut button in the panel to execute any command w
 ### Manual installation
 
 1. Download the latest release from Github
-1. Extract the zip archive to ~/.local/share/gnome-shell/extensions/shortcutbutton@antoine-meloche.github.com/
+1. Extract the zip archive to ~/.local/share/gnome-shell/extensions/shortcutbutton<area>@antoine-meloche.github.com/
 1. Enable the extension from the gnome extensions application or webseite
 
 ## Usage
