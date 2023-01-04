@@ -4,5 +4,8 @@
     <key name="command" type="s">
       <default>"echo hi"</default>
     </key>
+    <key name="icon" type="s">
+      <default>"emblem-symbolic-link"</default>
+    </key>
   </schema>
 </schemalist>

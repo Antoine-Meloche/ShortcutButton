@@ -29,12 +29,15 @@ class Indicator extends PanelMenu.Button {
   _init() {
     super._init(0.0, 'Indicator');
 
+    this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.shortcutbutton');
+
+    let iconName = this.settings.get_value('icon').get_string()[0];
+
+    // icon_name: 'emblem-symbolic-link',
     this.add_child(new St.Icon({
-      icon_name: 'emblem-symbolic-link',
+      icon_name: iconName,
       style_class: 'system-status-icon',
     }));
-
-	  this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.shortcutbutton');
 
     this.connect('button_press_event', (_obj, evt) => {
       if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
