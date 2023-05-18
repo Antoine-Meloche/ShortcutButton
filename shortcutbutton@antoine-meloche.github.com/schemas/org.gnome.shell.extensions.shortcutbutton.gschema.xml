@@ -5,7 +5,7 @@
       <default>"echo hi"</default>
     </key>
     <key name="icon" type="s">
-      <default>"emblem-symbolic-link"</default>
+      <default>"system-run-symbolic"</default>
     </key>
   </schema>
 </schemalist>

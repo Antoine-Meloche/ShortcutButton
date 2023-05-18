@@ -3,7 +3,9 @@
   "description": "A Button to execute a command in your shell panel",
   "uuid": "shortcutbutton@antoine-meloche.github.com",
   "shell-version": [
-    "42"
+    "42",
+    "43",
+    "44"
   ],
   "version": 2.0,
   "url": "https://github.com/Antoine-Meloche/ShortcutButton",
