@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.shortcutbutton" path="/org/gnome/shell/extensions/shortcutbutton/">
-    <key name="command" type="s">
-      <default>"echo hi"</default>
+    <key name="commands" type="as">
+      <default>['echo hi']</default>
     </key>
-    <key name="icon" type="s">
-      <default>"system-run-symbolic"</default>
+    <key name="icons" type="as">
+      <default>['system-run-symbolic']</default>
     </key>
   </schema>
 </schemalist>

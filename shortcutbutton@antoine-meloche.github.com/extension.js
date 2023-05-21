@@ -31,26 +31,30 @@ class Indicator extends PanelMenu.Button {
 
     this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.shortcutbutton');
 
-    let iconName = this.settings.get_value('icon').get_string()[0];
+    let commands = this.settings.get_value('commands').get_strv();
+    let icons = this.settings.get_value('icons').get_strv();
 
-    // icon_name: 'emblem-symbolic-link',
-    this.add_child(new St.Icon({
-      icon_name: iconName,
-      style_class: 'system-status-icon',
-    }));
+    for (let i = 0; i < commands.length; i++) {
+      let command = commands[i];
+      let icon = icons[i];
 
-    this.connect('button_press_event', (_obj, evt) => {
-      if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
-	      let command = this.settings.get_value('command').get_string()[0];
-	      if (command == "") {
-	      	log('Shortcut Button error: no command specified')
-	      }
+      this.add_child(new St.Icon({
+        icon_name: icon,
+        style_class: 'system-status-icon',
+      }));
 
-        let [success, pid] = GLib.spawn_command_line_async(command);
-      } else {
-        ExtensionUtils.openPrefs();
-      }
-    })
+      this.connect('button_press_event', (_obj, evt) => {
+        if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
+          if (command == "") {
+            log('Shortcut Button error: no command specified')
+          }
+
+          let [success, pid] = GLib.spawn_command_line_async(command);
+        } else {
+          ExtensionUtils.openPrefs();
+        }
+      });
+    }
   }
 });
 

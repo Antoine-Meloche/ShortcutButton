@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+glib-compile-schemas ./shortcutbutton@antoine-meloche.github.com/schemas/
+
 init_dir=$(pwd)
 
 rm -rf /tmp/shortcutbutton
