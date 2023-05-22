@@ -1,9 +1,9 @@
 const { GObject, Gtk, Adw, Gio, GdkPixbuf, GLib } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 
-function init () {}
+function init() {}
 
-function buildPrefsWidget () {
+function buildPrefsWidget() {
   return new UserCommandPrefsWidget();
 }
 
@@ -13,20 +13,22 @@ class UserCommandPrefsWidget extends Adw.PreferencesGroup {
   }
 
   constructor() {
-    super({ title: "Shortcut Button Command"});
+    super({ title: "Shortcut Button Command" });
 
-    let settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.shortcutbutton');
+    let settings = ExtensionUtils.getSettings(
+      "org.gnome.shell.extensions.shortcutbutton"
+    );
 
-    let commands = settings.get_value('commands').get_strv();
-    let icons = settings.get_value('icons').get_strv();
+    let commands = settings.get_value("commands").get_strv();
+    let iconList = settings.get_value("icons").get_strv();
 
     // Add all commands in the settings
     for (let i = 0; i < commands.length; i++) {
       let command = commands[i];
-      let icon = icons[i];
-      
+      let icon = iconList[i];
+
       let commandLabel = new Gtk.Label({
-        label: "Command to execute: "
+        label: "Command to execute: ",
       });
       let commandEntry = new Gtk.Entry();
 
@@ -35,48 +37,57 @@ class UserCommandPrefsWidget extends Adw.PreferencesGroup {
       hBoxCommand.append(commandLabel);
       hBoxCommand.append(commandEntry);
 
-      let settingKey = "command" + i;
-
-      settings.bind(settingKey, commandEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-
-      let iconLabel = new Gtk.Label({
-        label: "Icon: "
+      commandEntry.set_text(command);
+      commandEntry.connect("changed", () => {
+        commands[i] = commandEntry.get_text();
+        settings.set_value("commands", new GLib.Variant("as", commands));
       });
-      let iconPreview = new Gtk.Image();
-      let iconButton = new Gtk.Button({
-        label: "Select icon"
-      });
-      iconButton.connect('clicked', () => {
-        let fileChooser = new Gtk.FileChooserDialog({
-          title: "Select icon",
-          action: Gtk.FileChooserAction.OPEN,
-          modal: true
-        });
-        fileChooser.add_button("Cancel", Gtk.ResponseType.CANCEL);
-        fileChooser.add_button("Select", Gtk.ResponseType.OK);
-        fileChooser.connect('response', (dialog, response) => {
-          if (response == Gtk.ResponseType.OK) {
-            let filename = fileChooser.get_filename();
-            if (filename != null && filename != "") {
-              this.updatePreviewCb(filename);
-              fileChooser.destroy();
-            }
+
+      let iconGrid = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL });
+      let icons = [];
+      let selectedIcon = null;
+
+      let iconNames = [
+        "system-run",
+        "accessories-text-editor",
+        "internet-web-browser",
+        "emblem-system",
+        "system-lock-screen",
+        "system-log-out",
+      ];
+      for (let i = 0; i < iconNames.length; i++) {
+        let iconBox = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
+        let icon = new Gtk.Image();
+        let iconName = iconNames[i];
+        let iconFile = Gio.Icon.new_for_string(iconName);
+        icon.set_from_gicon(iconFile, Gtk.IconSize.BUTTON);
+
+        let eventBox = new Gtk.Button();
+        eventBox.set_icon_name(iconName);
+        eventBox.connect("clicked", () => {
+          if (selectedIcon) {
+            selectedIcon.remove_style_class_name("selected");
           }
-          fileChooser.destroy();
+          if (selectedIcon != icon) {
+            icon.add_style_class_name("selected");
+            selectedIcon = icon;
+          } else {
+            selectedIcon = null;
+          }
         });
-        fileChooser.show();
-      });
+        iconBox.append(eventBox);
+        icons.push(icon);
+        iconGrid.append(iconBox);
+      }
 
       let hBoxIcon = new Gtk.Box();
       hBoxIcon.set_orientation(Gtk.Orientation.HORIZONTAL);
-      hBoxIcon.append(iconLabel);
-      hBoxIcon.append(iconPreview);
-      hBoxIcon.append(iconButton);
+      hBoxIcon.append(iconGrid);
 
       let addButton = new Gtk.Button({
-        label: "Add Button"
-      })
-      addButton.connect('clicked', () => {
+        label: "Add Button",
+      });
+      addButton.connect("clicked", () => {
         this.addNewButton();
       });
 
@@ -87,16 +98,5 @@ class UserCommandPrefsWidget extends Adw.PreferencesGroup {
       this.add(vBox);
     }
   }
-  
-  updatePreviewCb(iconPath) {
-    let pixbuf = GdkPixbuf.Pixbuf.new_from_file(iconPath);
-    this.iconPreview.set_from_pixbuf(pixbuf);
-
-    return true;
-  }
-
-  addNewButton() {
-    
-  }
-
+  addNewButton() {}
 }
