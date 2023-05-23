@@ -1,9 +1,16 @@
-const { GObject, Gtk, Adw, Gio, GdkPixbuf, GLib } = imports.gi;
+const { GObject, Gdk, Gtk, Adw, Gio, GdkPixbuf, GLib } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 function init() {}
 
 function buildPrefsWidget() {
+  let styleProvider = new Gtk.CssProvider();
+  styleProvider.load_from_path('prefs.css')
+  Gtk.StyleContext.add_provider_for_display(
+    Gdk.Display.get_default(),
+    styleProvider,
+    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+  );
   return new UserCommandPrefsWidget();
 }
 
@@ -43,7 +50,7 @@ class UserCommandPrefsWidget extends Adw.PreferencesGroup {
         settings.set_value("commands", new GLib.Variant("as", commands));
       });
 
-      let iconGrid = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL });
+      let iconGrid = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
       let icons = [];
       let selectedIcon = null;
 
@@ -94,6 +101,7 @@ class UserCommandPrefsWidget extends Adw.PreferencesGroup {
       let vBox = new Gtk.Box();
       vBox.set_orientation(Gtk.Orientation.VERTICAL);
       vBox.append(hBoxIcon);
+      vBox.append(hBoxCommand);
       vBox.append(addButton);
       this.add(vBox);
     }
