@@ -24,56 +24,90 @@ const PanelMenu = imports.ui.panelMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
+// const Indicator = GObject.registerClass(
+//   class Indicator extends PanelMenu.Button {
+//     _init(command, icon) {
+//       super._init(0.0, "Indicator");
+
+//       this.add_child(
+//         new St.Icon({
+//           icon_name: icon,
+//           style_class: "system-status-icon",
+//         })
+//       );
+
+//       this.connect("button_press_event", (_obj, evt) => {
+//         if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
+//           if (command == "") {
+//             log("Shortcut Button error: no command specified");
+//           }
+//           let [success, pid] = GLib.spawn_command_line_async(command);
+//         } else {
+//           ExtensionUtils.openPrefs();
+//         }
+//       });
+//     }
+//   }
+// );
+
 const Indicator = GObject.registerClass(
-class Indicator extends PanelMenu.Button {
-  _init() {
-    super._init(0.0, 'Indicator');
+  class Indicator extends PanelMenu.Button {
+    constructor(command, icon) {
+      super(0.0, "Indicator");
 
-    this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.shortcutbutton');
+      this._icon = new St.Icon({
+        icon_name: icon,
+        style_class: "system-status-icon",
+      });
 
-    let commands = this.settings.get_value('commands').get_strv();
-    let icons = this.settings.get_value('icons').get_strv();
+      this.actor.add_child(this._icon);
+
+      this._command = command;
+
+      this.connect("button-press-event", () => {
+        if (this._command == "") {
+          log("Shortcut Button error: no command specified");
+        } else {
+          Gio.Subprocess.new(["/bin/bash", "-c", this._command]).spawn_async(
+            null
+          );
+        }
+      });
+    }
+
+    destroy() {
+      super.destroy();
+    }
+  }
+);
+
+class Extension {
+  constructor(uuid) {
+    this._uuid = uuid;
+  }
+
+  enable() {
+    this.settings = ExtensionUtils.getSettings(
+      "org.gnome.shell.extensions.shortcutbutton"
+    );
+
+    let commands = this.settings.get_value("commands").get_strv();
+    let icons = this.settings.get_value("icons").get_strv();
 
     for (let i = 0; i < commands.length; i++) {
       let command = commands[i];
       let icon = icons[i];
 
-      this.add_child(new St.Icon({
-        icon_name: icon,
-        style_class: 'system-status-icon',
-      }));
-
-      this.connect('button_press_event', (_obj, evt) => {
-        if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
-          if (command == "") {
-            log('Shortcut Button error: no command specified')
-          }
-
-          let [success, pid] = GLib.spawn_command_line_async(command);
-        } else {
-          ExtensionUtils.openPrefs();
-        }
-      });
+      let indicator = new Indicator(command, icon);
+      Main.panel.addToStatusArea(this._uuid, indicator);
     }
   }
-});
 
-class Extension {
-    constructor(uuid) {
-        this._uuid = uuid;
-    }
-
-    enable() {
-        this._indicator = new Indicator();
-        Main.panel.addToStatusArea(this._uuid, this._indicator);
-    }
-
-    disable() {
-        this._indicator.destroy();
-        this._indicator = null;
-    }
+  disable() {
+    Main.panel.statusArea[this._uuid].actor.hide();
+  }
 }
 
 function init(meta) {
-    return new Extension(meta.uuid);
+  return new Extension(meta.uuid);
 }
