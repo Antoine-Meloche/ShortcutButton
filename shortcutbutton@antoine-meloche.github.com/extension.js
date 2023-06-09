@@ -52,7 +52,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 
 const Indicator = GObject.registerClass(
   class Indicator extends PanelMenu.Button {
-    constructor(command, icon) {
+    constructor(commands, icon) {
       super(0.0, "Indicator");
 
       this._icon = new St.Icon({
@@ -62,16 +62,36 @@ const Indicator = GObject.registerClass(
 
       this.actor.add_child(this._icon);
 
-      this._command = command;
-
       this.connect("button-press-event", () => {
-        if (this._command == "") {
-          log("Shortcut Button error: no command specified");
-        } else {
-          Gio.Subprocess.new(["/bin/bash", "-c", this._command]).spawn_async(
-            null
-          );
+        // if (this._command == "") {
+        //   log("Shortcut Button error: no command specified");
+        // } else {
+        //   Gio.Subprocess.new(["/bin/bash", "-c", this._command]).spawn_async(
+        //     null
+        //   );
+        // }
+
+        // dropdown list of commands to execute
+        let menu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
+        
+        for (let i = 0; i < commands.length; i++) {
+          let command = commands[i];
+          let item = new PopupMenu.PopupMenuItem(command);
+          menu.addMenuItem(item);
+          item.connect("activate", () => {
+            Gio.Subprocess.new(["/bin/bash", "-c", command]).spawn_async(
+              null
+            );
+          });
         }
+
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        let settingsItem = new PopupMenu.PopupMenuItem("Settings");
+        menu.addMenuItem(settingsItem);
+        settingsItem.connect("activate", () => {
+          ExtensionUtils.openPrefs();
+        });
       });
     }
 
@@ -94,13 +114,16 @@ class Extension {
     let commands = this.settings.get_value("commands").get_strv();
     let icons = this.settings.get_value("icons").get_strv();
 
-    for (let i = 0; i < commands.length; i++) {
-      let command = commands[i];
-      let icon = icons[i];
+    // for (let i = 0; i < commands.length; i++) {
+    //   let command = commands[i];
+    //   let icon = icons[i];
 
-      let indicator = new Indicator(command, icon);
-      Main.panel.addToStatusArea(this._uuid, indicator);
-    }
+    //   let indicator = new Indicator(command, icon);
+    //   Main.panel.addToStatusArea(this._uuid, indicator);
+    // }
+
+    let indicator = new Indicator(commands, icons[0]);
+    Main.panel.addToStatusArea(this._uuid, indicator);
   }
 
   disable() {
