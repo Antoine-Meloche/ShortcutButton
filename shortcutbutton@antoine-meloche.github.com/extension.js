@@ -19,80 +19,59 @@
  */
 
 const { GObject, St, GLib, Clutter } = imports.gi;
+const Gio = imports.gi.Gio;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
-// const Indicator = GObject.registerClass(
-//   class Indicator extends PanelMenu.Button {
-//     _init(command, icon) {
-//       super._init(0.0, "Indicator");
-
-//       this.add_child(
-//         new St.Icon({
-//           icon_name: icon,
-//           style_class: "system-status-icon",
-//         })
-//       );
-
-//       this.connect("button_press_event", (_obj, evt) => {
-//         if (evt.get_button() == Clutter.BUTTON_PRIMARY) {
-//           if (command == "") {
-//             log("Shortcut Button error: no command specified");
-//           }
-//           let [success, pid] = GLib.spawn_command_line_async(command);
-//         } else {
-//           ExtensionUtils.openPrefs();
-//         }
-//       });
-//     }
-//   }
-// );
-
 const Indicator = GObject.registerClass(
   class Indicator extends PanelMenu.Button {
-    constructor(commands, icon) {
+    constructor(commands, icons) {
       super(0.0, "Indicator");
 
       this._icon = new St.Icon({
-        icon_name: icon,
+        icon_name: icons[0],
         style_class: "system-status-icon",
       });
 
       this.actor.add_child(this._icon);
 
-      this.connect("button-press-event", () => {
-        // if (this._command == "") {
-        //   log("Shortcut Button error: no command specified");
-        // } else {
-        //   Gio.Subprocess.new(["/bin/bash", "-c", this._command]).spawn_async(
-        //     null
-        //   );
-        // }
+      let menu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
 
-        // dropdown list of commands to execute
-        let menu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
-        
-        for (let i = 0; i < commands.length; i++) {
-          let command = commands[i];
-          let item = new PopupMenu.PopupMenuItem(command);
-          menu.addMenuItem(item);
-          item.connect("activate", () => {
-            Gio.Subprocess.new(["/bin/bash", "-c", command]).spawn_async(
-              null
-            );
-          });
+      this.connect("button-press-event", (event) => {
+        // primary button pressed
+        if (event.get_button() == 1) {
+          Gio.Subprocess.new(["/bin/bash", "-c", commands[0]]).spawn_async(
+            null
+          );
+        } else if (event.get_button() == 3) {
+          menu.toggle();
         }
-
-        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-        let settingsItem = new PopupMenu.PopupMenuItem("Settings");
-        menu.addMenuItem(settingsItem);
-        settingsItem.connect("activate", () => {
-          ExtensionUtils.openPrefs();
-        });
       });
+
+      for (let i = 0; i < commands.length; i++) {
+        let command = commands[i];
+        let icon = icons[i];
+        let item = new PopupMenu.PopupImageMenuItem(command, icon);
+        menu.addMenuItem(item);
+        item.connect("activate", () => {
+          Gio.Subprocess.new(["/bin/bash", "-c", command]).spawn_async(null);
+        });
+      }
+
+      menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+      let settingsItem = new PopupMenu.PopupMenuItem("Settings");
+      menu.addMenuItem(settingsItem);
+      settingsItem.connect("activate", () => {
+        ExtensionUtils.openPrefs();
+      });
+
+      this.menu = menu;
+      Main.uiGroup.add_actor(this.menu.actor);
+      this.menu.actor.hide();
     }
 
     destroy() {
@@ -114,15 +93,7 @@ class Extension {
     let commands = this.settings.get_value("commands").get_strv();
     let icons = this.settings.get_value("icons").get_strv();
 
-    // for (let i = 0; i < commands.length; i++) {
-    //   let command = commands[i];
-    //   let icon = icons[i];
-
-    //   let indicator = new Indicator(command, icon);
-    //   Main.panel.addToStatusArea(this._uuid, indicator);
-    // }
-
-    let indicator = new Indicator(commands, icons[0]);
+    let indicator = new Indicator(commands, icons);
     Main.panel.addToStatusArea(this._uuid, indicator);
   }
 
